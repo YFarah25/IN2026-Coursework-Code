@@ -52,9 +52,14 @@ private:
 	shared_ptr<GUILabel> mScoreLabel;
 	shared_ptr<GUILabel> mLivesLabel;
 	shared_ptr<GUILabel> mGameOverLabel;
+	shared_ptr<GUILabel> mStartGameLabel;
+	shared_ptr<GUILabel> mTitleLabel;
+	
+
 
 	uint mLevel;
 	uint mAsteroidCount;
+	bool mGameStarted;
 
 	void ResetSpaceship();
 	shared_ptr<GameObject> CreateSpaceship();
@@ -65,6 +70,8 @@ private:
 	const static uint SHOW_GAME_OVER = 0;
 	const static uint START_NEXT_LEVEL = 1;
 	const static uint CREATE_NEW_PLAYER = 2;
+	const static uint SHOW_NEW_GAME = 3;
+
 
 	ScoreKeeper mScoreKeeper;
 	Player mPlayer;

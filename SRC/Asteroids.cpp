@@ -12,6 +12,7 @@
 #include "GUILabel.h"
 #include "Explosion.h"
 
+
 // PUBLIC INSTANCE CONSTRUCTORS ///////////////////////////////////////////////
 
 /** Constructor. Takes arguments from command line, just in case. */
@@ -20,6 +21,7 @@ Asteroids::Asteroids(int argc, char *argv[])
 {
 	mLevel = 0;
 	mAsteroidCount = 0;
+	mGameStarted = false;
 }
 
 /** Destructor. */
@@ -59,7 +61,7 @@ void Asteroids::Start()
 	Animation *spaceship_anim = AnimationManager::GetInstance().CreateAnimationFromFile("spaceship", 128, 128, 128, 128, "spaceship_fs.png");
 
 	// Create a spaceship and add it to the world
-	mGameWorld->AddObject(CreateSpaceship());
+	//mGameWorld->AddObject(CreateSpaceship());
 	// Create some asteroids and add them to the world
 	CreateAsteroids(10);
 
@@ -87,11 +89,37 @@ void Asteroids::Stop()
 
 void Asteroids::OnKeyPressed(uchar key, int x, int y)
 {
+	if (!mGameStarted) {
+		switch (key) {
+			// Hide start screen 
+		case ' ':
+
+			mGameStarted = true;
+			mStartGameLabel->SetVisible(false);
+			mTitleLabel->SetVisible(false);
+
+
+			// Create a spaceship and add it to the world
+			mGameWorld->AddObject(CreateSpaceship());
+			mScoreKeeper.mScore = 0;
+			mPlayer.mLives = 3;
+			
+
+			break;
+		default:
+			break;
+		}
+	}
 	switch (key)
 	{
 	case ' ':
 		mSpaceship->Shoot();
 		break;
+	// Quit game
+	case 'q':
+		Stop();
+		break;
+
 	default:
 		break;
 	}
@@ -101,32 +129,38 @@ void Asteroids::OnKeyReleased(uchar key, int x, int y) {}
 
 void Asteroids::OnSpecialKeyPressed(int key, int x, int y)
 {
-	switch (key)
+	if (mGameStarted)
 	{
-	// If up arrow key is pressed start applying forward thrust
-	case GLUT_KEY_UP: mSpaceship->Thrust(10); break;
-	// If left arrow key is pressed start rotating anti-clockwise
-	case GLUT_KEY_LEFT: mSpaceship->Rotate(90); break;
-	// If right arrow key is pressed start rotating clockwise
-	case GLUT_KEY_RIGHT: mSpaceship->Rotate(-90); break;
-	// Default case - do nothing
-	default: break;
+		switch (key)
+		{
+			// If up arrow key is pressed start applying forward thrust
+		case GLUT_KEY_UP: mSpaceship->Thrust(10); break;
+			// If left arrow key is pressed start rotating anti-clockwise
+		case GLUT_KEY_LEFT: mSpaceship->Rotate(90); break;
+			// If right arrow key is pressed start rotating clockwise
+		case GLUT_KEY_RIGHT: mSpaceship->Rotate(-90); break;
+			// Default case - do nothing
+		default: break;
+		}
 	}
 }
 
 void Asteroids::OnSpecialKeyReleased(int key, int x, int y)
 {
-	switch (key)
+	if (mGameStarted)
 	{
-	// If up arrow key is released stop applying forward thrust
-	case GLUT_KEY_UP: mSpaceship->Thrust(0); break;
-	// If left arrow key is released stop rotating
-	case GLUT_KEY_LEFT: mSpaceship->Rotate(0); break;
-	// If right arrow key is released stop rotating
-	case GLUT_KEY_RIGHT: mSpaceship->Rotate(0); break;
-	// Default case - do nothing
-	default: break;
-	} 
+		switch (key)
+		{
+			// If up arrow key is released stop applying forward thrust
+		case GLUT_KEY_UP: mSpaceship->Thrust(0); break;
+			// If left arrow key is released stop rotating
+		case GLUT_KEY_LEFT: mSpaceship->Rotate(0); break;
+			// If right arrow key is released stop rotating
+		case GLUT_KEY_RIGHT: mSpaceship->Rotate(0); break;
+			// Default case - do nothing
+		default: break;
+		}
+	}
 }
 
 
@@ -143,7 +177,7 @@ void Asteroids::OnObjectRemoved(GameWorld* world, shared_ptr<GameObject> object)
 		mAsteroidCount--;
 		if (mAsteroidCount <= 0) 
 		{ 
-			SetTimer(500, START_NEXT_LEVEL); 
+ 			SetTimer(500, START_NEXT_LEVEL); 
 		}
 	}
 }
@@ -168,6 +202,19 @@ void Asteroids::OnTimer(int value)
 	if (value == SHOW_GAME_OVER)
 	{
 		mGameOverLabel->SetVisible(true);
+		// Loops back to start screen
+		SetTimer(3000, SHOW_NEW_GAME);
+	}
+	// Start screen after game over screen
+	if (value == SHOW_NEW_GAME)
+	{
+		mGameOverLabel->SetVisible(false);
+		mLivesLabel->SetVisible(false);
+		mScoreLabel->SetVisible(false);
+		mScoreKeeper.mScore = 0;
+		mLevel = 0;
+		CreateGUI();
+		mGameStarted = false;
 	}
 
 }
@@ -243,6 +290,38 @@ void Asteroids::CreateGUI()
 	shared_ptr<GUIComponent> game_over_component
 		= static_pointer_cast<GUIComponent>(mGameOverLabel);
 	mGameDisplay->GetContainer()->AddComponent(game_over_component, GLVector2f(0.5f, 0.5f));
+
+	// Create a new GUILabel and wrap it up in a shared_ptr
+	mStartGameLabel = shared_ptr<GUILabel>(new GUILabel("START GAME"));
+	// Set the horizontal alignment of the label to GUI_HALIGN_CENTER
+	mStartGameLabel->SetHorizontalAlignment(GUIComponent::GUI_HALIGN_CENTER);
+	// Set the vertical alignment of the label to GUI_VALIGN_MIDDLE
+	mStartGameLabel->SetVerticalAlignment(GUIComponent::GUI_VALIGN_MIDDLE);
+	// Set the visibility of the label to false (hidden)
+	mStartGameLabel->SetVisible(true);
+	// Add the GUILabel to the GUIContainer  
+	shared_ptr<GUIComponent> start_game_component
+		= static_pointer_cast<GUIComponent>(mStartGameLabel);
+	mGameDisplay->GetContainer()->AddComponent(start_game_component, GLVector2f(0.5f, 0.5f));
+
+	// Create a new GUILabel and wrap it up in a shared_ptr
+	mTitleLabel = shared_ptr<GUILabel>(new GUILabel("ASTEROIDS"));
+	// Set the horizontal alignment of the label to GUI_HALIGN_CENTER
+	mTitleLabel->SetHorizontalAlignment(GUIComponent::GUI_HALIGN_CENTER);
+	// Set the vertical alignment of the label to GUI_VALIGN_MIDDLE
+	mTitleLabel->SetVerticalAlignment(GUIComponent::GUI_VALIGN_MIDDLE);
+	// Set the visibility of the label to false (hidden)
+	mTitleLabel->SetVisible(true);
+	// Set the color of the label to RGB value as a Vector3f
+	mTitleLabel->SetColor(GLVector3f(0.4f, 0.6f, 1.0f));
+	// Set the size of the label
+	//mTitleLabel->SetSize(GLVector2i(20, 20));
+
+	// Add the GUILabel to the GUIContainer  
+	shared_ptr<GUIComponent> title_component
+		= static_pointer_cast<GUIComponent>(mTitleLabel);
+	mGameDisplay->GetContainer()->AddComponent(title_component, GLVector2f(0.5f, 0.75f));
+
 
 }
 

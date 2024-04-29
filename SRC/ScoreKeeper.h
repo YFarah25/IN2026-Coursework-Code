@@ -37,9 +37,9 @@ public:
 			(*lit)->OnScoreChanged(mScore);
 		}
 	}
+	int mScore;
 
 private:
-	int mScore;
 
 	typedef std::list< shared_ptr<IScoreListener> > ScoreListenerList;
 
