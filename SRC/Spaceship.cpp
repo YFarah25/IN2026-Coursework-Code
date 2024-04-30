@@ -12,6 +12,7 @@ using namespace std;
 Spaceship::Spaceship()
 	: GameObject("Spaceship"), mThrust(0)
 {
+	mShielded = true;
 }
 
 /** Construct a spaceship with given position, velocity, acceleration, angle, and rotation. */
@@ -46,7 +47,7 @@ void Spaceship::Render(void)
 	if (mSpaceshipShape.get() != NULL) mSpaceshipShape->Render();
 
 	// If ship is thrusting
-	if ((mThrust > 0) && (mThrusterShape.get() != NULL)) {
+	if ((mShielded) && (mThrusterShape.get() != NULL)) {
 		mThrusterShape->Render();
 	}
 
@@ -94,13 +95,26 @@ void Spaceship::Shoot(void)
 
 bool Spaceship::CollisionTest(shared_ptr<GameObject> o)
 {
-	if (o->GetType() != GameObjectType("Asteroid")) return false;
+	if (o->GetType() != GameObjectType("Asteroid") || (o->GetType() != GameObjectType("Shield"))) return false;
 	if (mBoundingShape.get() == NULL) return false;
 	if (o->GetBoundingShape().get() == NULL) return false;
 	return mBoundingShape->CollisionTest(o->GetBoundingShape());
 }
 
-void Spaceship::OnCollision(const GameObjectList &objects)
+void Spaceship::OnCollision(const GameObjectList& objects)
 {
-	mWorld->FlagForRemoval(GetThisPtr());
+	for (const auto& obj : objects) {
+		 if(obj->GetType() == GameObjectType("Asteroid")) {
+			// Check if the shield is active
+			if (mShielded) {
+				// Remove shield
+				mShielded = false;
+			}
+			else {
+				// Shield is not active, handle death
+				mWorld->FlagForRemoval(GetThisPtr());
+				mShielded = true;
+			}
+		}
+	}
 }

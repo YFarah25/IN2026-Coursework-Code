@@ -13,6 +13,7 @@
 class GameObject;
 class Spaceship;
 class GUILabel;
+class Shield;
 
 class Asteroids : public GameSession, public IKeyboardListener, public IGameWorldListener, public IScoreListener, public IPlayerListener
 {
@@ -55,6 +56,8 @@ private:
 	shared_ptr<GUILabel> mStartGameLabel;
 	shared_ptr<GUILabel> mTitleLabel;
 	
+	shared_ptr<Shield> mShield;
+	void CreateShield();
 
 
 	uint mLevel;

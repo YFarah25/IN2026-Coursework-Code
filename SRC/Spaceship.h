@@ -27,6 +27,8 @@ public:
 	bool CollisionTest(shared_ptr<GameObject> o);
 	void OnCollision(const GameObjectList &objects);
 
+	bool mShielded;
+
 private:
 	float mThrust;
 
