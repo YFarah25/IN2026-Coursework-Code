@@ -19,6 +19,7 @@ public:
 	virtual void Thrust(float t);
 	virtual void Rotate(float r);
 	virtual void Shoot(void);
+	void SetShielded(bool shielded);
 
 	void SetSpaceshipShape(shared_ptr<Shape> spaceship_shape) { mSpaceshipShape = spaceship_shape; }
 	void SetThrusterShape(shared_ptr<Shape> thruster_shape) { mThrusterShape = thruster_shape; }

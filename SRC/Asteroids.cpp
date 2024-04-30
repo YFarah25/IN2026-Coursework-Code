@@ -12,6 +12,7 @@
 #include "GUILabel.h"
 #include "Explosion.h"
 #include "Shield.h"
+#include "Life.h"
 
 
 // PUBLIC INSTANCE CONSTRUCTORS ///////////////////////////////////////////////
@@ -69,6 +70,9 @@ void Asteroids::Start()
 	// Create a shield powerup and add to world
 	CreateShield();
 
+	// Create a life powerup and add to world
+	CreateLife();
+
 	//Create the GUI
 	CreateGUI();
 
@@ -107,6 +111,10 @@ void Asteroids::OnKeyPressed(uchar key, int x, int y)
 			mGameWorld->AddObject(CreateSpaceship());
 			mScoreKeeper.mScore = 0;
 			mPlayer.mLives = 3;
+
+			// Shield on spawn should expire after 2 seconds
+			SetTimer(2000, SHIELD_EXPIRE);
+
 	
 			break;
 		default:
@@ -138,6 +146,8 @@ void Asteroids::OnSpecialKeyPressed(int key, int x, int y)
 		{
 			// If up arrow key is pressed start applying forward thrust
 		case GLUT_KEY_UP: mSpaceship->Thrust(10); break;
+			// If up arrow key is pressed start applying forward thrust
+		case GLUT_KEY_DOWN: mSpaceship->Thrust(-10); break;
 			// If left arrow key is pressed start rotating anti-clockwise
 		case GLUT_KEY_LEFT: mSpaceship->Rotate(90); break;
 			// If right arrow key is pressed start rotating clockwise
@@ -156,6 +166,8 @@ void Asteroids::OnSpecialKeyReleased(int key, int x, int y)
 		{
 			// If up arrow key is released stop applying forward thrust
 		case GLUT_KEY_UP: mSpaceship->Thrust(0); break;
+			// If down arrow key is released stop applying forward thrust
+		case GLUT_KEY_DOWN: mSpaceship->Thrust(0); break;
 			// If left arrow key is released stop rotating
 		case GLUT_KEY_LEFT: mSpaceship->Rotate(0); break;
 			// If right arrow key is released stop rotating
@@ -184,7 +196,7 @@ void Asteroids::OnObjectRemoved(GameWorld* world, shared_ptr<GameObject> object)
 		}
 	}
 
-	if (object->GetType() == GameObjectType("Shield"))
+	if (object->GetType() == GameObjectType("Shield") && mSpaceship)
 	{
 		if (mSpaceship->mShielded == false)
 		{
@@ -192,6 +204,17 @@ void Asteroids::OnObjectRemoved(GameWorld* world, shared_ptr<GameObject> object)
 		}
 		
 		//add interaction for shield pickup when shielded
+	}
+
+	if (object->GetType() == GameObjectType("Life") && mSpaceship)
+	{
+		mPlayer.mLives += 1;
+		// Format the lives left message using an string-based stream
+		std::ostringstream msg_stream;
+		msg_stream << "Lives: " << mPlayer.mLives;
+		// Get the lives left message as a string
+		std::string lives_msg = msg_stream.str();
+		mLivesLabel->SetText(lives_msg);
 	}
 
 }
@@ -229,6 +252,10 @@ void Asteroids::OnTimer(int value)
 		mLevel = 0;
 		CreateGUI();
 		mGameStarted = false;
+	}
+	if (value == SHIELD_EXPIRE)
+	{
+		mSpaceship->SetShielded(false);
 	}
 
 }
@@ -282,8 +309,15 @@ void Asteroids::CreateAsteroids(const uint num_asteroids)
 void Asteroids::CreateShield()
 {
 	mShield = make_shared<Shield>();
-	mShield->SetBoundingShape(make_shared<BoundingSphere>(mShield->GetThisPtr(), 10.0f));
+	mShield->SetBoundingShape(make_shared<BoundingSphere>(mShield->GetThisPtr(), 4.0f));
 	mGameWorld->AddObject(mShield);
+}
+
+void Asteroids::CreateLife()
+{
+	mLife = make_shared<Life>();
+	mLife->SetBoundingShape(make_shared<BoundingSphere>(mLife->GetThisPtr(), 3.0f));
+	mGameWorld->AddObject(mLife);
 }
 
 void Asteroids::CreateGUI()
@@ -345,11 +379,12 @@ void Asteroids::CreateGUI()
 	mTitleLabel->SetColor(GLVector3f(0.4f, 0.6f, 1.0f));
 	// Set the size of the label
 	//mTitleLabel->SetSize(GLVector2i(20, 20));
-
 	// Add the GUILabel to the GUIContainer  
 	shared_ptr<GUIComponent> title_component
 		= static_pointer_cast<GUIComponent>(mTitleLabel);
 	mGameDisplay->GetContainer()->AddComponent(title_component, GLVector2f(0.5f, 0.75f));
+
+
 
 
 }

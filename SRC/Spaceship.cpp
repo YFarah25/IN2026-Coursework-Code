@@ -69,6 +69,11 @@ void Spaceship::Rotate(float r)
 	mRotation = r;
 }
 
+// Setter for mShielded
+void Spaceship::SetShielded(bool shielded) {
+	mShielded = shielded;
+}
+
 /** Shoot a bullet. */
 void Spaceship::Shoot(void)
 {

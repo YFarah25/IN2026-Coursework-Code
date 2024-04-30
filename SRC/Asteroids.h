@@ -14,6 +14,7 @@ class GameObject;
 class Spaceship;
 class GUILabel;
 class Shield;
+class Life;
 
 class Asteroids : public GameSession, public IKeyboardListener, public IGameWorldListener, public IScoreListener, public IPlayerListener
 {
@@ -55,9 +56,14 @@ private:
 	shared_ptr<GUILabel> mGameOverLabel;
 	shared_ptr<GUILabel> mStartGameLabel;
 	shared_ptr<GUILabel> mTitleLabel;
+	//shared_ptr<GUILabel> mLevelLabel;
+
 	
 	shared_ptr<Shield> mShield;
 	void CreateShield();
+
+	shared_ptr<Life> mLife;
+	void CreateLife();
 
 
 	uint mLevel;
@@ -74,6 +80,7 @@ private:
 	const static uint START_NEXT_LEVEL = 1;
 	const static uint CREATE_NEW_PLAYER = 2;
 	const static uint SHOW_NEW_GAME = 3;
+	const static uint SHIELD_EXPIRE = 4;
 
 
 	ScoreKeeper mScoreKeeper;

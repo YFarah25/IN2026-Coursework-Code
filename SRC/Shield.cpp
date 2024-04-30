@@ -25,7 +25,7 @@ void Shield::Render(void)
 	glDisable(GL_LIGHTING);
 	glBegin(GL_TRIANGLES);
 	glColor3f(0.4, 0.6, 1.0);
-	//add vertices make a square
+	//bottom two and top point of triangle
 	glVertex2f(-2, -4);
 	glVertex2f(4, -2);
 	glVertex2f(0, 2);
@@ -36,7 +36,7 @@ void Shield::Render(void)
 
 bool Shield::CollisionTest(shared_ptr<GameObject> o)
 {
-	if (o->GetType() == GameObjectType("Asteroid") || (o->GetType() == GameObjectType("Bullet"))) return false;
+	if (o->GetType() == GameObjectType("Asteroid") || (o->GetType() == GameObjectType("Bullet") || (o->GetType() == GameObjectType("Life")))) return false;
 	if (mBoundingShape.get() == NULL) return false;
 	if (o->GetBoundingShape().get() == NULL) return false;
 	return mBoundingShape->CollisionTest(o->GetBoundingShape());
