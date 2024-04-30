@@ -91,7 +91,7 @@ void Asteroids::OnKeyPressed(uchar key, int x, int y)
 {
 	if (!mGameStarted) {
 		switch (key) {
-			// Hide start screen 
+			// Switch from start screen to the game starting 
 		case ' ':
 
 			mGameStarted = true;
@@ -103,7 +103,7 @@ void Asteroids::OnKeyPressed(uchar key, int x, int y)
 			mGameWorld->AddObject(CreateSpaceship());
 			mScoreKeeper.mScore = 0;
 			mPlayer.mLives = 3;
-			
+
 
 			break;
 		default:
@@ -115,7 +115,7 @@ void Asteroids::OnKeyPressed(uchar key, int x, int y)
 	case ' ':
 		mSpaceship->Shoot();
 		break;
-	// Quit game
+		// Quit game
 	case 'q':
 		Stop();
 		break;
@@ -188,8 +188,8 @@ void Asteroids::OnTimer(int value)
 {
 	if (value == CREATE_NEW_PLAYER)
 	{
-		mSpaceship->Reset();
-		mGameWorld->AddObject(mSpaceship);
+			mSpaceship->Reset();
+			mGameWorld->AddObject(mSpaceship);
 	}
 
 	if (value == START_NEXT_LEVEL)
@@ -292,7 +292,7 @@ void Asteroids::CreateGUI()
 	mGameDisplay->GetContainer()->AddComponent(game_over_component, GLVector2f(0.5f, 0.5f));
 
 	// Create a new GUILabel and wrap it up in a shared_ptr
-	mStartGameLabel = shared_ptr<GUILabel>(new GUILabel("START GAME"));
+	mStartGameLabel = shared_ptr<GUILabel>(new GUILabel("PRESS SPACE TO START"));
 	// Set the horizontal alignment of the label to GUI_HALIGN_CENTER
 	mStartGameLabel->SetHorizontalAlignment(GUIComponent::GUI_HALIGN_CENTER);
 	// Set the vertical alignment of the label to GUI_VALIGN_MIDDLE
