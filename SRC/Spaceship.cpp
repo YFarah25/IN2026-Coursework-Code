@@ -39,6 +39,10 @@ void Spaceship::Update(int t)
 {
 	// Call parent update function
 	GameObject::Update(t);
+
+	// Update acceleration based on thrust and angle
+	mAcceleration.x = mThrust * cos(DEG2RAD * mAngle);
+	mAcceleration.y = mThrust * sin(DEG2RAD * mAngle);
 }
 
 /** Render this spaceship. */
@@ -58,9 +62,7 @@ void Spaceship::Render(void)
 void Spaceship::Thrust(float t)
 {
 	mThrust = t;
-	// Increase acceleration in the direction of ship
-	mAcceleration.x = mThrust*cos(DEG2RAD*mAngle);
-	mAcceleration.y = mThrust*sin(DEG2RAD*mAngle);
+	
 }
 
 /** Set the rotation. */

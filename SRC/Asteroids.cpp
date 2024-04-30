@@ -149,9 +149,9 @@ void Asteroids::OnSpecialKeyPressed(int key, int x, int y)
 			// If up arrow key is pressed start applying forward thrust
 		case GLUT_KEY_DOWN: mSpaceship->Thrust(-10); break;
 			// If left arrow key is pressed start rotating anti-clockwise
-		case GLUT_KEY_LEFT: mSpaceship->Rotate(90); break;
+		case GLUT_KEY_LEFT: mSpaceship->Rotate(120); break;
 			// If right arrow key is pressed start rotating clockwise
-		case GLUT_KEY_RIGHT: mSpaceship->Rotate(-90); break;
+		case GLUT_KEY_RIGHT: mSpaceship->Rotate(-120); break;
 			// Default case - do nothing
 		default: break;
 		}
@@ -211,7 +211,7 @@ void Asteroids::OnObjectRemoved(GameWorld* world, shared_ptr<GameObject> object)
 		mPlayer.mLives += 1;
 		// Format the lives left message using an string-based stream
 		std::ostringstream msg_stream;
-		msg_stream << "Lives: " << mPlayer.mLives;
+		msg_stream << "LIVES: " << mPlayer.mLives;
 		// Get the lives left message as a string
 		std::string lives_msg = msg_stream.str();
 		mLivesLabel->SetText(lives_msg);
@@ -233,6 +233,9 @@ void Asteroids::OnTimer(int value)
 	{
 		mLevel++;
 		int num_asteroids = 10 + 2 * mLevel;
+		mSpaceship->SetShielded(true);
+		// Shield on spawn should expire after 2 seconds
+		SetTimer(2000, SHIELD_EXPIRE);
 		CreateAsteroids(num_asteroids);
 	}
 
@@ -325,7 +328,7 @@ void Asteroids::CreateGUI()
 	// Add a (transparent) border around the edge of the game display
 	mGameDisplay->GetContainer()->SetBorder(GLVector2i(10, 10));
 	// Create a new GUILabel and wrap it up in a shared_ptr
-	mScoreLabel = make_shared<GUILabel>("Score: 0");
+	mScoreLabel = make_shared<GUILabel>("SCORE: 0");
 	// Set the vertical alignment of the label to GUI_VALIGN_TOP
 	mScoreLabel->SetVerticalAlignment(GUIComponent::GUI_VALIGN_TOP);
 	// Add the GUILabel to the GUIComponent  
@@ -334,7 +337,7 @@ void Asteroids::CreateGUI()
 	mGameDisplay->GetContainer()->AddComponent(score_component, GLVector2f(0.0f, 1.0f));
 
 	// Create a new GUILabel and wrap it up in a shared_ptr
-	mLivesLabel = make_shared<GUILabel>("Lives: 3");
+	mLivesLabel = make_shared<GUILabel>("LIVES: 3");
 	// Set the vertical alignment of the label to GUI_VALIGN_BOTTOM
 	mLivesLabel->SetVerticalAlignment(GUIComponent::GUI_VALIGN_BOTTOM);
 	// Add the GUILabel to the GUIComponent  
@@ -384,7 +387,7 @@ void Asteroids::CreateGUI()
 		= static_pointer_cast<GUIComponent>(mTitleLabel);
 	mGameDisplay->GetContainer()->AddComponent(title_component, GLVector2f(0.5f, 0.75f));
 
-
+	
 
 
 }
@@ -393,7 +396,7 @@ void Asteroids::OnScoreChanged(int score)
 {
 	// Format the score message using an string-based stream
 	std::ostringstream msg_stream;
-	msg_stream << "Score: " << score;
+	msg_stream << "SCORE: " << score;
 	// Get the score message as a string
 	std::string score_msg = msg_stream.str();
 	mScoreLabel->SetText(score_msg);
@@ -408,7 +411,7 @@ void Asteroids::OnPlayerKilled(int lives_left)
 
 	// Format the lives left message using an string-based stream
 	std::ostringstream msg_stream;
-	msg_stream << "Lives: " << lives_left;
+	msg_stream << "LIVES: " << lives_left;
 	// Get the lives left message as a string
 	std::string lives_msg = msg_stream.str();
 	mLivesLabel->SetText(lives_msg);
