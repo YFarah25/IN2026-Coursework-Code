@@ -13,6 +13,7 @@
 #include "Explosion.h"
 #include "Shield.h"
 #include "Life.h"
+#include "AlienSpaceship.h"
 
 
 // PUBLIC INSTANCE CONSTRUCTORS ///////////////////////////////////////////////
@@ -77,6 +78,9 @@ void Asteroids::Start()
 
 	//Create the GUI
 	CreateGUI();
+
+	mGameWorld->AddObject(CreateAlienSpaceship());
+
 
 	// Add a player (watcher) to the game world
 	mGameWorld->AddListener(&mPlayer);
@@ -210,14 +214,14 @@ void Asteroids::OnObjectRemoved(GameWorld* world, shared_ptr<GameObject> object)
 		}
 	}
 
-	if (object->GetType() == GameObjectType("Shield") && mSpaceship)
+	if (object->GetType() == GameObjectType("Shield") && mSpaceship && mPlayer.mLives > 0)
 	{
 		if (mSpaceship->mShielded == false)
 		{
 			mSpaceship->mShielded = true;
 		}
 		
-		//add interaction for shield pickup when shielded
+		SetTimer(5000, SPAWN_SHIELD);
 	}
 
 	if (object->GetType() == GameObjectType("Life") && mSpaceship && mPlayer.mLives > 0)
@@ -229,6 +233,9 @@ void Asteroids::OnObjectRemoved(GameWorld* world, shared_ptr<GameObject> object)
 		// Get the lives left message as a string
 		std::string lives_msg = msg_stream.str();
 		mLivesLabel->SetText(lives_msg);
+
+		SetTimer(5000, SPAWN_LIFE);
+
 	}
 
 }
@@ -291,6 +298,17 @@ void Asteroids::OnTimer(int value)
 		mSpaceship->SetShielded(false);
 	}
 
+	if (value == SPAWN_SHIELD)
+	{
+		CreateShield();
+	}
+
+	if (value == SPAWN_LIFE)
+	{
+		CreateLife();
+	}
+			
+
 }
 
 // PROTECTED INSTANCE METHODS /////////////////////////////////////////////////
@@ -301,11 +319,10 @@ shared_ptr<GameObject> Asteroids::CreateSpaceship()
 	mSpaceship = make_shared<Spaceship>();
 	mSpaceship->SetBoundingShape(make_shared<BoundingSphere>(mSpaceship->GetThisPtr(), 4.0f));
 	shared_ptr<Shape> spaceship_shape = make_shared<Shape>("spaceship.shape");
-	// change thruster_shape to shield shape
-	shared_ptr<Shape> thruster_shape = make_shared<Shape>("shield.shape");
+	shared_ptr<Shape> shield_shape = make_shared<Shape>("shield.shape");
 	shared_ptr<Shape> bullet_shape = make_shared<Shape>("bullet.shape");
 	mSpaceship->SetSpaceshipShape(spaceship_shape);
-	mSpaceship->SetThrusterShape(thruster_shape);
+	mSpaceship->SetShieldShape(shield_shape);
 	mSpaceship->SetBulletShape(bullet_shape);
 
 	/*Animation* anim_ptr = AnimationManager::GetInstance().GetAnimationByName("spaceship");
@@ -318,6 +335,35 @@ shared_ptr<GameObject> Asteroids::CreateSpaceship()
 	mSpaceship->Reset();
 	// Return the spaceship so it can be added to the world
 	return mSpaceship;
+
+
+}
+
+shared_ptr<GameObject> Asteroids::CreateAlienSpaceship()
+{
+	// Create a raw pointer to a spaceship that can be converted to
+	// shared_ptrs of different types because GameWorld implements IRefCount
+	mAlienSpaceship = make_shared<AlienSpaceship>();
+	mAlienSpaceship->SetBoundingShape(make_shared<BoundingSphere>(mAlienSpaceship->GetThisPtr(), 4.0f));
+	shared_ptr<Shape> alien_bullet_shape = make_shared<Shape>("bullet.shape");
+	mAlienSpaceship->SetBulletShape(alien_bullet_shape);
+	Animation* anim_ptr = AnimationManager::GetInstance().GetAnimationByName("spaceship");
+	shared_ptr<Sprite> alien_spaceship_sprite =
+		make_shared<Sprite>(anim_ptr->GetWidth(), anim_ptr->GetHeight(), anim_ptr);
+	mAlienSpaceship->SetSprite(alien_spaceship_sprite);
+	mAlienSpaceship->SetScale(0.1f);
+
+
+	/*Animation* anim_ptr = AnimationManager::GetInstance().GetAnimationByName("spaceship");
+	shared_ptr<Sprite> spaceship_sprite =
+		make_shared<Sprite>(anim_ptr->GetWidth(), anim_ptr->GetHeight(), anim_ptr);
+	mSpaceship->SetSprite(spaceship_sprite);
+	mSpaceship->SetScale(0.1f);*/
+
+	// Reset spaceship back to centre of the world
+	mAlienSpaceship->Reset();
+	// Return the spaceship so it can be added to the world
+	return mAlienSpaceship;
 
 
 }

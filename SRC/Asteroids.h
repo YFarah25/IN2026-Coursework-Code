@@ -12,6 +12,7 @@
 
 class GameObject;
 class Spaceship;
+class AlienSpaceship;
 class GUILabel;
 class Shield;
 class Life;
@@ -51,6 +52,7 @@ public:
 
 private:
 	shared_ptr<Spaceship> mSpaceship;
+	shared_ptr<AlienSpaceship> mAlienSpaceship;
 	shared_ptr<GUILabel> mScoreLabel;
 	shared_ptr<GUILabel> mLivesLabel;
 	shared_ptr<GUILabel> mGameOverLabel;
@@ -72,6 +74,7 @@ private:
 
 	void ResetSpaceship();
 	shared_ptr<GameObject> CreateSpaceship();
+	shared_ptr<GameObject> CreateAlienSpaceship();
 	void CreateGUI();
 	void CreateAsteroids(const uint num_asteroids);
 	void ClearGameObjects();
@@ -82,7 +85,8 @@ private:
 	const static uint CREATE_NEW_PLAYER = 2;
 	const static uint SHOW_NEW_GAME = 3;
 	const static uint SHIELD_EXPIRE = 4;
-
+	const static uint SPAWN_SHIELD = 5;
+	const static uint SPAWN_LIFE = 6;
 
 	ScoreKeeper mScoreKeeper;
 	Player mPlayer;

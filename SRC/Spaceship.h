@@ -22,7 +22,7 @@ public:
 	void SetShielded(bool shielded);
 
 	void SetSpaceshipShape(shared_ptr<Shape> spaceship_shape) { mSpaceshipShape = spaceship_shape; }
-	void SetThrusterShape(shared_ptr<Shape> thruster_shape) { mThrusterShape = thruster_shape; }
+	void SetShieldShape(shared_ptr<Shape> shield_shape) { mShieldShape = shield_shape; }
 	void SetBulletShape(shared_ptr<Shape> bullet_shape) { mBulletShape = bullet_shape; }
 
 	bool CollisionTest(shared_ptr<GameObject> o);
@@ -34,7 +34,7 @@ private:
 	float mThrust;
 
 	shared_ptr<Shape> mSpaceshipShape;
-	shared_ptr<Shape> mThrusterShape;
+	shared_ptr<Shape> mShieldShape;
 	shared_ptr<Shape> mBulletShape;
 };
 

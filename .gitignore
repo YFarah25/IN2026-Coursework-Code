@@ -396,3 +396,10 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
+LIB/Engine.idb
+LIB/Engine.lib
+LIB/Engine.lib
+VC/Engine/Engine.vcxproj
+VC/Engine/Engine.vcxproj
+VC/Engine/Engine.vcxproj
+VC/Asteroids/Asteroids.vcxproj
