@@ -133,7 +133,9 @@ void Asteroids::OnKeyPressed(uchar key, int x, int y)
 			// Create a life powerup and add to world
 			CreateLife();
 
+			//Create alien and add to world
 			mGameWorld->AddObject(CreateAlienSpaceship());
+			// Start moving after half a second
 			SetTimer(500, MOVE_ALIEN);
 
 
@@ -335,8 +337,8 @@ void Asteroids::OnTimer(int value)
 
 	if (value == MOVE_ALIEN)
 	{
-		mAlienSpaceship->Thrust(rand() % 6 + (-3));
-		mAlienSpaceship->Rotate(rand() % 120 + (-10));
+		mAlienSpaceship->Thrust(rand() % 5 + (-2));
+		mAlienSpaceship->Rotate(rand() % 241 + (-120));
 		mAlienSpaceship->Shoot();
 		SetTimer(1000, MOVE_ALIEN);
 	}
