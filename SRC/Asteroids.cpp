@@ -24,6 +24,7 @@ Asteroids::Asteroids(int argc, char *argv[])
 	mLevel = 0;
 	mAsteroidCount = 0;
 	mGameStarted = false;
+	list<shared_ptr<GameObject>>gameObjects;
 }
 
 /** Destructor. */
@@ -51,6 +52,7 @@ void Asteroids::Start()
 	// Add this class as a listener of the score keeper
 	mScoreKeeper.AddListener(thisPtr);
 
+
 	// Create an ambient light to show sprite textures
 	GLfloat ambient_light[] = { 1.0f, 1.0f, 1.0f, 1.0f };
 	GLfloat diffuse_light[] = { 1.0f, 1.0f, 1.0f, 1.0f };
@@ -65,13 +67,13 @@ void Asteroids::Start()
 	// Create a spaceship and add it to the world
 	//mGameWorld->AddObject(CreateSpaceship());
 	// Create some asteroids and add them to the world
-	CreateAsteroids(10);
+	//CreateAsteroids(10);
 
 	// Create a shield powerup and add to world
-	CreateShield();
+	//CreateShield();
 
 	// Create a life powerup and add to world
-	CreateLife();
+	//CreateLife();
 
 	//Create the GUI
 	CreateGUI();
@@ -105,6 +107,8 @@ void Asteroids::OnKeyPressed(uchar key, int x, int y)
 			mGameStarted = true;
 			mStartGameLabel->SetVisible(false);
 			mTitleLabel->SetVisible(false);
+			mScoreLabel->SetVisible(true);
+			mLivesLabel->SetVisible(true);
 
 
 			// Create a spaceship and add it to the world
@@ -114,6 +118,15 @@ void Asteroids::OnKeyPressed(uchar key, int x, int y)
 
 			// Shield on spawn should expire after 2 seconds
 			SetTimer(2000, SHIELD_EXPIRE);
+			//ClearGameObjects();
+			CreateAsteroids(10);
+
+			// Create a shield powerup and add to world
+			CreateShield();
+
+			// Create a life powerup and add to world
+			CreateLife();
+
 
 	
 			break;
@@ -185,14 +198,15 @@ void Asteroids::OnObjectRemoved(GameWorld* world, shared_ptr<GameObject> object)
 {
 	if (object->GetType() == GameObjectType("Asteroid"))
 	{
+		gameObjects.remove(object);
 		shared_ptr<GameObject> explosion = CreateExplosion();
 		explosion->SetPosition(object->GetPosition());
 		explosion->SetRotation(object->GetRotation());
 		mGameWorld->AddObject(explosion);
 		mAsteroidCount--;
-		if (mAsteroidCount <= 0)
+		if (mAsteroidCount <= 0 && mPlayer.mLives > 0)
 		{
-			SetTimer(500, START_NEXT_LEVEL);
+			SetTimer(2000, START_NEXT_LEVEL);
 		}
 	}
 
@@ -206,7 +220,7 @@ void Asteroids::OnObjectRemoved(GameWorld* world, shared_ptr<GameObject> object)
 		//add interaction for shield pickup when shielded
 	}
 
-	if (object->GetType() == GameObjectType("Life") && mSpaceship)
+	if (object->GetType() == GameObjectType("Life") && mSpaceship && mPlayer.mLives > 0)
 	{
 		mPlayer.mLives += 1;
 		// Format the lives left message using an string-based stream
@@ -227,21 +241,29 @@ void Asteroids::OnTimer(int value)
 	{
 			mSpaceship->Reset();
 			mGameWorld->AddObject(mSpaceship);
+			// Shield on spawn should expire after 2 seconds
+			SetTimer(2000, SHIELD_EXPIRE);
 	}
 
 	if (value == START_NEXT_LEVEL)
 	{
 		mLevel++;
 		int num_asteroids = 10 + 2 * mLevel;
-		mSpaceship->SetShielded(true);
-		// Shield on spawn should expire after 2 seconds
-		SetTimer(2000, SHIELD_EXPIRE);
 		CreateAsteroids(num_asteroids);
+		// Only give temporary shield if the player isn't already shielded
+		if (!mSpaceship->mShielded) {
+			mSpaceship->SetShielded(true);
+			// Shield on new level should expire after 2 seconds
+			SetTimer(2000, SHIELD_EXPIRE);
+		}
+
 	}
 
 	if (value == SHOW_GAME_OVER)
 	{
 		mGameOverLabel->SetVisible(true);
+		//mLivesLabel->SetVisible(false);
+		ClearGameObjects();
 		// Loops back to start screen
 		SetTimer(3000, SHOW_NEW_GAME);
 	}
@@ -251,11 +273,19 @@ void Asteroids::OnTimer(int value)
 		mGameOverLabel->SetVisible(false);
 		mLivesLabel->SetVisible(false);
 		mScoreLabel->SetVisible(false);
+		mStartGameLabel->SetVisible(true);
+		mTitleLabel->SetVisible(true);
 		mScoreKeeper.mScore = 0;
 		mLevel = 0;
-		CreateGUI();
+		mPlayer.mLives = 3;
+		mLivesLabel->SetText("LIVES: 3");
+		mScoreLabel->SetText("SCORE: 0");
+		// Readd score keeper to the game world
+		mGameWorld->AddListener(&mScoreKeeper);
+
 		mGameStarted = false;
 	}
+
 	if (value == SHIELD_EXPIRE)
 	{
 		mSpaceship->SetShielded(false);
@@ -305,14 +335,29 @@ void Asteroids::CreateAsteroids(const uint num_asteroids)
 		asteroid->SetBoundingShape(make_shared<BoundingSphere>(asteroid->GetThisPtr(), 10.0f));
 		asteroid->SetSprite(asteroid_sprite);
 		asteroid->SetScale(0.2f);
+		gameObjects.push_back(asteroid);
 		mGameWorld->AddObject(asteroid);
 	}
+}
+
+void Asteroids::ClearGameObjects() {
+	// Remove score listener so that removed asteroids don't add to score
+	mGameWorld->RemoveListener(&mScoreKeeper);
+	// Flag asteroids and powerups for removal
+	for (auto i = gameObjects.begin(); i != gameObjects.end(); i++) {
+		mGameWorld->FlagForRemoval(*i);
+
+		//if (i->get()->GetType() == GameObjectType("Asteroid")) {}
+	}
+
 }
 
 void Asteroids::CreateShield()
 {
 	mShield = make_shared<Shield>();
 	mShield->SetBoundingShape(make_shared<BoundingSphere>(mShield->GetThisPtr(), 4.0f));
+	// Add shield to list of game objects
+	gameObjects.push_back(mShield);
 	mGameWorld->AddObject(mShield);
 }
 
@@ -320,6 +365,7 @@ void Asteroids::CreateLife()
 {
 	mLife = make_shared<Life>();
 	mLife->SetBoundingShape(make_shared<BoundingSphere>(mLife->GetThisPtr(), 3.0f));
+	gameObjects.push_back(mLife);
 	mGameWorld->AddObject(mLife);
 }
 
@@ -331,6 +377,8 @@ void Asteroids::CreateGUI()
 	mScoreLabel = make_shared<GUILabel>("SCORE: 0");
 	// Set the vertical alignment of the label to GUI_VALIGN_TOP
 	mScoreLabel->SetVerticalAlignment(GUIComponent::GUI_VALIGN_TOP);
+	// Set the visibility of the label to false (hidden)
+	mScoreLabel->SetVisible(false);
 	// Add the GUILabel to the GUIComponent  
 	shared_ptr<GUIComponent> score_component
 		= static_pointer_cast<GUIComponent>(mScoreLabel);
@@ -340,6 +388,8 @@ void Asteroids::CreateGUI()
 	mLivesLabel = make_shared<GUILabel>("LIVES: 3");
 	// Set the vertical alignment of the label to GUI_VALIGN_BOTTOM
 	mLivesLabel->SetVerticalAlignment(GUIComponent::GUI_VALIGN_BOTTOM);
+	// Set the visibility of the label to false (hidden)
+	mLivesLabel->SetVisible(false);
 	// Add the GUILabel to the GUIComponent  
 	shared_ptr<GUIComponent> lives_component = static_pointer_cast<GUIComponent>(mLivesLabel);
 	mGameDisplay->GetContainer()->AddComponent(lives_component, GLVector2f(0.0f, 0.0f));
@@ -386,9 +436,6 @@ void Asteroids::CreateGUI()
 	shared_ptr<GUIComponent> title_component
 		= static_pointer_cast<GUIComponent>(mTitleLabel);
 	mGameDisplay->GetContainer()->AddComponent(title_component, GLVector2f(0.5f, 0.75f));
-
-	
-
 
 }
 
