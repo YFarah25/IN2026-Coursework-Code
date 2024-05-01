@@ -58,6 +58,8 @@ private:
 	shared_ptr<GUILabel> mGameOverLabel;
 	shared_ptr<GUILabel> mStartGameLabel;
 	shared_ptr<GUILabel> mTitleLabel;
+	shared_ptr<GUILabel> mLevelLabel;
+
 
 	
 	shared_ptr<Shield> mShield;
@@ -65,6 +67,8 @@ private:
 
 	shared_ptr<Life> mLife;
 	void CreateLife();
+
+	void UpdateLevel(int level);
 
 
 	uint mLevel;
