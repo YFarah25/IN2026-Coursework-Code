@@ -19,11 +19,20 @@ public:
 
 	void OnObjectRemoved(GameWorld* world, shared_ptr<GameObject> object)
 	{
-		if ((object->GetType() == GameObjectType("Asteroid")) || object->GetType() == GameObjectType("Shield")) {
- 			mScore += 10;
+		if (object->GetType() == GameObjectType("Asteroid")) {
+			mScore += 5;
+			FireScoreChanged();
+		}
+		if (object->GetType() == GameObjectType("Shield") || object->GetType() == GameObjectType("Life")) {
+			mScore += 10;
+			FireScoreChanged();
+		}
+		if (object->GetType() == GameObjectType("AlienSpaceship")) {
+			mScore += 20;
 			FireScoreChanged();
 		}
 	}
+
 
 	void AddListener(shared_ptr<IScoreListener> listener)
 	{

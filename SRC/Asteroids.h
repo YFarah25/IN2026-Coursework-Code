@@ -91,6 +91,10 @@ private:
 	const static uint SHIELD_EXPIRE = 4;
 	const static uint SPAWN_SHIELD = 5;
 	const static uint SPAWN_LIFE = 6;
+	const static uint SPAWN_ALIEN = 7;
+	const static uint MOVE_ALIEN = 8;
+	const static uint ALIEN_DODGE = 9;
+
 
 	ScoreKeeper mScoreKeeper;
 	Player mPlayer;

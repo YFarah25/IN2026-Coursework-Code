@@ -1,37 +1,37 @@
 #include "GameWorld.h"
-#include "Bullet.h"
+#include "AlienBullet.h"
 #include "BoundingSphere.h"
 
 // PUBLIC INSTANCE CONSTRUCTORS ///////////////////////////////////////////////
 
 /** Constructor. Bullets live for 2s by default. */
-Bullet::Bullet()
-	: GameObject("Bullet"), mTimeToLive(1000)
+AlienBullet::AlienBullet()
+	: GameObject("AlienBullet"), mTimeToLive(1500)
 {
 }
 
 /** Construct a new bullet with given position, velocity, acceleration, angle, rotation and lifespan. */
-Bullet::Bullet(GLVector3f p, GLVector3f v, GLVector3f a, GLfloat h, GLfloat r, int ttl)
-	: GameObject("Bullet", p, v, a, h, r), mTimeToLive(ttl)
+AlienBullet::AlienBullet(GLVector3f p, GLVector3f v, GLVector3f a, GLfloat h, GLfloat r, int ttl)
+	: GameObject("AlienBullet", p, v, a, h, r), mTimeToLive(ttl)
 {
 }
 
 /** Copy constructor. */
-Bullet::Bullet(const Bullet& b)
+AlienBullet::AlienBullet(const AlienBullet& b)
 	: GameObject(b),
-	  mTimeToLive(b.mTimeToLive)
+	mTimeToLive(b.mTimeToLive)
 {
 }
 
 /** Destructor. */
-Bullet::~Bullet(void)
+AlienBullet::~AlienBullet(void)
 {
 }
 
 // PUBLIC INSTANCE METHODS ////////////////////////////////////////////////////
 
 /** Update bullet, removing it from game world if necessary. */
-void Bullet::Update(int t)
+void AlienBullet::Update(int t)
 {
 	// Update position/velocity
 	GameObject::Update(t);
@@ -46,16 +46,15 @@ void Bullet::Update(int t)
 
 }
 
-bool Bullet::CollisionTest(shared_ptr<GameObject> o)
+bool AlienBullet::CollisionTest(shared_ptr<GameObject> o)
 {
-	if (o->GetType() == GameObjectType("Shield") || o->GetType() == GameObjectType("Life") 
-		|| o->GetType() == GameObjectType("Spaceship")) return false;
+	if (o->GetType() != GameObjectType("Spaceship")) return false;
 	if (mBoundingShape.get() == NULL) return false;
 	if (o->GetBoundingShape().get() == NULL) return false;
 	return mBoundingShape->CollisionTest(o->GetBoundingShape());
 }
 
-void Bullet::OnCollision(const GameObjectList& objects)
+void AlienBullet::OnCollision(const GameObjectList& objects)
 {
 	mWorld->FlagForRemoval(GetThisPtr());
 }

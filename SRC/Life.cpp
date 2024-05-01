@@ -27,7 +27,7 @@ void Life::Render(void)
 	glColor3f(1.0, 0.2, 0.4);
 	for (int i = 0; i < 360; i++) {
 		float degInRad = i * M_PI / 180;
-		glVertex2f(2 + cos(degInRad) * 2, -2 + sin(degInRad) * 2);
+		glVertex2f(2 + cos(degInRad) * 4, -2 + sin(degInRad) * 4);
 	}
 	glEnd();
 	//enable lighting
@@ -36,7 +36,7 @@ void Life::Render(void)
 
 bool Life::CollisionTest(shared_ptr<GameObject> o)
 {
-	if (o->GetType() == GameObjectType("Asteroid") || (o->GetType() == GameObjectType("Bullet")) || (o->GetType() == GameObjectType("Shield"))) return false;
+	if (o->GetType() != GameObjectType("Spaceship")) return false;
 	if (mBoundingShape.get() == NULL) return false;
 	if (o->GetBoundingShape().get() == NULL) return false;
 	return mBoundingShape->CollisionTest(o->GetBoundingShape());

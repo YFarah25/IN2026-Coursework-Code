@@ -1,6 +1,6 @@
 #include "GameUtil.h"
 #include "GameWorld.h"
-#include "Bullet.h"
+#include "AlienBullet.h"
 #include "AlienSpaceship.h"
 #include "BoundingSphere.h"
 
@@ -12,13 +12,17 @@ using namespace std;
 AlienSpaceship::AlienSpaceship()
 	: GameObject("AlienSpaceship"), mAlienThrust(0)
 {
-	mAlienShielded = true;
+	mAlienShielded = false;
+	mPosition.x = rand() / 2;
+	mPosition.y = rand() / 2;
+	mPosition.z = 0.0;
 }
 
 /** Construct a spaceship with given position, velocity, acceleration, angle, and rotation. */
 AlienSpaceship::AlienSpaceship(GLVector3f p, GLVector3f v, GLVector3f a, GLfloat h, GLfloat r)
 	: GameObject("AlienSpaceship", p, v, a, h, r), mAlienThrust(0)
 {
+	
 }
 
 /** Copy constructor. */
@@ -83,12 +87,12 @@ void AlienSpaceship::Shoot(void)
 	// Calculate the point at the node of the spaceship from position and heading
 	GLVector3f bullet_position = mPosition + (spaceship_heading * 4);
 	// Calculate how fast the bullet should travel
-	float bullet_speed = 30;
+	float bullet_speed = 15;
 	// Construct a vector for the bullet's velocity
 	GLVector3f bullet_velocity = mVelocity + spaceship_heading * bullet_speed;
 	// Construct a new bullet
 	shared_ptr<GameObject> bullet
-	(new Bullet(bullet_position, bullet_velocity, mAcceleration, mAngle, 0, 2000));
+	(new AlienBullet(bullet_position, bullet_velocity, mAcceleration, mAngle, 0, 2000));
 	bullet->SetBoundingShape(make_shared<BoundingSphere>(bullet->GetThisPtr(), 2.0f));
 	bullet->SetShape(mAlienBulletShape);
 	// Add the new bullet to the game world
@@ -106,18 +110,12 @@ bool AlienSpaceship::CollisionTest(shared_ptr<GameObject> o)
 
 void AlienSpaceship::OnCollision(const GameObjectList& objects)
 {
-	for (const auto& obj : objects) {
-		if (obj->GetType() == GameObjectType("Spaceship") || (obj->GetType() == GameObjectType("Bullet"))) {
-			// Check if the shield is active
-			if (mAlienShielded) {
-				// Remove shield
-				mAlienShielded = false;
-			}
-			else {
-				// Shield is not active, handle death
-				mWorld->FlagForRemoval(GetThisPtr());
-				mAlienShielded = true;
-			}
-		}
+	if (mAlienShielded) {
+		// Remove shield
+		mAlienShielded = false;
+	}
+	else {
+		// Shield is not active, handle death
+		mWorld->FlagForRemoval(GetThisPtr());
 	}
 }

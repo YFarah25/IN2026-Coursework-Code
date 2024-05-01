@@ -79,7 +79,8 @@ void Asteroids::Start()
 	//Create the GUI
 	CreateGUI();
 
-	mGameWorld->AddObject(CreateAlienSpaceship());
+	//mGameWorld->AddObject(CreateAlienSpaceship());
+	//SetTimer(500, MOVE_ALIEN);
 
 
 	// Add a player (watcher) to the game world
@@ -132,6 +133,9 @@ void Asteroids::OnKeyPressed(uchar key, int x, int y)
 			// Create a life powerup and add to world
 			CreateLife();
 
+			mGameWorld->AddObject(CreateAlienSpaceship());
+			SetTimer(500, MOVE_ALIEN);
+
 
 	
 			break;
@@ -143,6 +147,7 @@ void Asteroids::OnKeyPressed(uchar key, int x, int y)
 	{
 	case ' ':
 		mSpaceship->Shoot();
+		/*SetTimer(100, ALIEN_DODGE);*/
 		break;
 		// Quit game
 	case 'q':
@@ -213,6 +218,16 @@ void Asteroids::OnObjectRemoved(GameWorld* world, shared_ptr<GameObject> object)
 		{
 			SetTimer(2000, START_NEXT_LEVEL);
 		}
+	}
+
+	if (object->GetType() == GameObjectType("AlienSpaceship") && mPlayer.mLives > 0)
+	{
+		shared_ptr<GameObject> explosion = CreateExplosion();
+		explosion->SetPosition(object->GetPosition());
+		explosion->SetRotation(object->GetRotation());
+		mGameWorld->AddObject(explosion);
+		SetTimer(5000, SPAWN_ALIEN);
+
 	}
 
 	if (object->GetType() == GameObjectType("Shield") && mSpaceship && mPlayer.mLives > 0)
@@ -293,7 +308,6 @@ void Asteroids::OnTimer(int value)
 		mScoreLabel->SetText("SCORE: 0");
 		// Readd score keeper to the game world
 		mGameWorld->AddListener(&mScoreKeeper);
-
 		mGameStarted = false;
 	}
 
@@ -311,6 +325,26 @@ void Asteroids::OnTimer(int value)
 	{
 		CreateLife();
 	}
+
+	if (value == SPAWN_ALIEN)
+	{
+		mGameWorld->AddObject(CreateAlienSpaceship());
+		SetTimer(500, MOVE_ALIEN);
+
+	}
+
+	if (value == MOVE_ALIEN)
+	{
+		mAlienSpaceship->Thrust(rand() % 6 + (-3));
+		mAlienSpaceship->Rotate(rand() % 120 + (-10));
+		mAlienSpaceship->Shoot();
+		SetTimer(1000, MOVE_ALIEN);
+	}
+
+	/*if (value == ALIEN_DODGE)
+	{
+		mAlienSpaceship->mAlienThrust *= -1;
+	}*/
 			
 
 }
@@ -349,7 +383,7 @@ shared_ptr<GameObject> Asteroids::CreateAlienSpaceship()
 	// shared_ptrs of different types because GameWorld implements IRefCount
 	mAlienSpaceship = make_shared<AlienSpaceship>();
 	mAlienSpaceship->SetBoundingShape(make_shared<BoundingSphere>(mAlienSpaceship->GetThisPtr(), 4.0f));
-	shared_ptr<Shape> alien_bullet_shape = make_shared<Shape>("bullet.shape");
+	shared_ptr<Shape> alien_bullet_shape = make_shared<Shape>("alien_bullet.shape");
 	mAlienSpaceship->SetBulletShape(alien_bullet_shape);
 	Animation* anim_ptr = AnimationManager::GetInstance().GetAnimationByName("spaceship");
 	shared_ptr<Sprite> alien_spaceship_sprite =
@@ -364,8 +398,10 @@ shared_ptr<GameObject> Asteroids::CreateAlienSpaceship()
 	mSpaceship->SetSprite(spaceship_sprite);
 	mSpaceship->SetScale(0.1f);*/
 
+	gameObjects.push_back(mAlienSpaceship);
+
 	// Reset spaceship back to centre of the world
-	mAlienSpaceship->Reset();
+	//mAlienSpaceship->Reset();
 	// Return the spaceship so it can be added to the world
 	return mAlienSpaceship;
 
@@ -414,7 +450,7 @@ void Asteroids::CreateShield()
 void Asteroids::CreateLife()
 {
 	mLife = make_shared<Life>();
-	mLife->SetBoundingShape(make_shared<BoundingSphere>(mLife->GetThisPtr(), 3.0f));
+	mLife->SetBoundingShape(make_shared<BoundingSphere>(mLife->GetThisPtr(), 6.0f));
 	gameObjects.push_back(mLife);
 	mGameWorld->AddObject(mLife);
 }

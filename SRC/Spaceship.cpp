@@ -50,9 +50,9 @@ void Spaceship::Render(void)
 {
 	if (mSpaceshipShape.get() != NULL) mSpaceshipShape->Render();
 
-	// If ship is thrusting
-	if ((mShielded) && (mThrusterShape.get() != NULL)) {
-		mThrusterShape->Render();
+	// If ship is shielded
+	if ((mShielded) && (mShieldShape.get() != NULL)) {
+		mShieldShape->Render();
 	}
 
 	GameObject::Render();
@@ -111,7 +111,7 @@ bool Spaceship::CollisionTest(shared_ptr<GameObject> o)
 void Spaceship::OnCollision(const GameObjectList& objects)
 {
 	for (const auto& obj : objects) {
-		 if(obj->GetType() == GameObjectType("Asteroid")) {
+		 if(obj->GetType() == GameObjectType("Asteroid") || obj->GetType() == GameObjectType("AlienBullet")) {
 			// Check if the shield is active
 			if (mShielded) {
 				// Remove shield

@@ -29,9 +29,9 @@ public:
 	void OnCollision(const GameObjectList& objects);
 
 	bool mAlienShielded;
+	float mAlienThrust;
 
 private:
-	float mAlienThrust;
 
 	shared_ptr<Shape> mAlienSpaceshipShape;
 	shared_ptr<Shape> mAlienThrusterShape;
